@@ -1,0 +1,48 @@
+class jose {
+sysctl { 'net.ipv4.ip_forward':
+  ensure => 'present',
+  val    => '1',
+  value  => '1',
+comment => " this is managed by puppet",
+}
+grub_config { 'password':
+  value => '=1111111'
+}
+group {'jbinst' :
+    ensure   => 'present',
+    gid      => '500',
+#   members  => 'jbinst',
+  }
+  user {'jbinst' :
+    ensure           => 'present',
+    comment          => 'CTR deployment id',
+    uid              => '500',
+    gid              => '500',
+    home             => '/home/jbinst',
+#   password         => '$1$BKTYIuka$7qv4Sh4rctxIhV5ro6aPU.',
+#   password_max_age => '99999',
+#   password_min_age => '0',
+    shell            => '/sbin/nologin',
+    require          => Group['jbinst'],
+  }
+
+  user { 'root':
+    ensure    => 'present',
+    comment   => 'root',
+    uid       => '0',
+    gid       => '0',
+    home      => '/root',
+#   password  => '$1$LxW7akUi$iD..bjtRtra4wASA9RiWa1',
+    password_max_age  => '99999',
+    password_min_age  => '0',
+    shell     => '/bin/bash',
+  }
+
+ssh_authorized_key { "jbinst@${::fqdn}":
+    user    => 'root',
+    type    => 'ssh-rsa',
+    key     => hiera('authkey', 'XXXXXX'),
+  }
+
+
+}
